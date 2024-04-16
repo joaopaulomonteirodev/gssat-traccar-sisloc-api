@@ -1,0 +1,19 @@
+{
+  "name": "gssat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && node src/main.js",
+    "start:windows": "node src/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "mysql2": "^3.9.4"
+  }
+}
