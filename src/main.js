@@ -1,9 +1,9 @@
 import { createConnection } from "./conection.js"
 import { sendData } from "./request.js"
 
-const connection = await createConnection()
 
 try {
+    const connection = await createConnection()
     const [results] = await connection
     .query(`SELECT p.deviceid, p.servertime, p.attributes AS 'position_data', d.attributes AS 'device_data'
     FROM tc_positions p
@@ -13,6 +13,8 @@ try {
             FROM tc_positions
             GROUP BY deviceid
         ) m ON(p.deviceid = m.deviceid AND p.servertime = m.servertime) `)
+
+    connection.end() 
 
     const gps = results.map(
         result => ({
@@ -28,13 +30,10 @@ try {
 
     }))
 
-    const response = await sendData({ gps })
-    console.log(response)
+    const {data} = await sendData({ gps })
+    console.log(data)
 
 
 } catch (error) {
     console.log(error)
-} finally {
-
-    connection.end()
 }
