@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && node --env-file=.env src/main.js",
+    "start": "node src/main.js",
     "start:windows": "node --env-file=.env src/main.js"
   },
   "keywords": [],
