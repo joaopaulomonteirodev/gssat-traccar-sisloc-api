@@ -30,11 +30,10 @@ const gps = results.map(
 const data_sent = JSON.stringify({ gps })
 
 try {
-    gps.map(g => console.log(g.dt_medicao))
-    // const { data } = await sendData({ gps })
-    // const response = JSON.stringify(data)
+    const { data } = await sendData({ gps })
+    const response = JSON.stringify(data)
 
-    // await connection.query(`INSERT INTO SISLOCINTEGRATIONLOG (data_sent, response) VALUES('${data_sent}', '${response}')`)
+    await connection.query(`INSERT INTO SISLOCINTEGRATIONLOG (data_sent, response) VALUES('${data_sent}', '${response}')`)
 
 } catch (error) {
     const data = (error.response?.data)  ? error.response?.data : { error: 'Something went wrong' }
