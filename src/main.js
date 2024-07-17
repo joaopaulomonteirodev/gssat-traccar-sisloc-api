@@ -1,30 +1,24 @@
 import { createConnection } from "./conection.js"
+import { getDevices, getPositions, getTelemetryValue } from "./helper.js"
 import { sendData } from "./request.js"
 
 const BR_TIME_OFFSET = 3 * 60 * 60 * 1000
 const connection = await createConnection()
 
-const [results] = await connection
-    .query(`SELECT p.deviceid, p.devicetime, p.attributes AS 'position_data', d.attributes AS 'device_data'
-    FROM tc_positions p
-        INNER JOIN tc_devices d ON(d.id = p.deviceid)
-        INNER JOIN (
-            SELECT deviceid, MAX(devicetime) AS devicetime
-            FROM tc_positions
-            GROUP BY deviceid
-        ) m ON(p.deviceid = m.deviceid AND p.devicetime = m.devicetime) `)
+const devices = await getDevices(connection)
+const positions = await getPositions(devices, connection)
 
-const gps = results.map(
-    result => ({
-        devicetime: new Date(result.devicetime.getTime() - BR_TIME_OFFSET).toISOString(),
-        device: JSON.parse(result.device_data),
-        telemetry: JSON.parse(result.position_data)
+const gps = positions.map(
+    position => ({
+        devicetime: new Date(position.device_time.getTime() - BR_TIME_OFFSET).toISOString(),
+        device: position.patrimonio,
+        telemetry: getTelemetryValue(position),
     })
-).filter(position => !!position.device.Patrimonio)
+).filter(position => !!position.telemetry)
 .map(position => ({
-    nr_patrimonio: position.device.Patrimonio,
+    nr_patrimonio: position.device,
     dt_medicao: position.devicetime.replace('0Z', 'Z'),
-    vl_medicao: position.telemetry.hours
+    vl_medicao: position.telemetry
 }))
 
 const data_sent = JSON.stringify({ gps })
@@ -33,7 +27,7 @@ try {
     const { data } = await sendData({ gps })
     const response = JSON.stringify(data)
 
-    await connection.query(`INSERT INTO SISLOCINTEGRATIONLOG (data_sent, response) VALUES('${data_sent}', '${response}')`)
+    await connection.query(`INSERT INTO sislocintegrationlog (data_sent, response) VALUES('${data_sent}', '${response}')`)
 
 } catch (error) {
     const data = (error.response?.data)  ? error.response?.data : { error: 'Something went wrong' }
@@ -42,7 +36,7 @@ try {
         informacao: data
     })
 
-    await connection.query(`INSERT INTO SISLOCINTEGRATIONLOG (data_sent, response) VALUES('${data_sent}', '${response}')`)
+    await connection.query(`INSERT INTO sislocintegrationlog (data_sent, response) VALUES('${data_sent}', '${response}')`)
 } finally {
     connection.end()
 }
