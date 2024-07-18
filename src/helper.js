@@ -3,7 +3,7 @@ export async function getDevices(connection) {
     .query(`SELECT d.id, d.patrimonio, d.traccar_device_id AS traccar_id, s.id as sensor_id, s.unit_of_measurement as unit
             FROM hypegps_web.devices d 
 	            INNER JOIN hypegps_web.device_sensors s ON (s.device_id = d.id)
-            WHERE patrimonio IS NOT NULL AND s.type = 'engine_hours' `)
+            WHERE patrimonio IS NOT NULL AND patrimonio <> '' AND s.type = 'engine_hours' `)
 
     return devices
 }
