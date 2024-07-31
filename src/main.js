@@ -1,23 +1,22 @@
 import { createConnection } from "./conection.js"
-import { getDevices, getPositions, getTelemetryValue } from "./helper.js"
+import { getDevices, getPositions } from "./helper.js"
 import { sendData } from "./request.js"
 
-const BR_TIME_OFFSET = 3 * 60 * 60 * 1000
+const BR_TIME_OFFSET = 6 * 60 * 60 * 1000
 const connection = await createConnection()
-
 const devices = await getDevices(connection)
-const positions = await getPositions(devices, connection)
+const positions = getPositions(devices)
 
 const gps = positions.map(
     position => ({
-        devicetime: new Date(position.device_time.getTime() - BR_TIME_OFFSET).toISOString(),
+        devicetime: new Date(position.device_time - BR_TIME_OFFSET).toISOString(),
         device: position.patrimonio,
-        telemetry: getTelemetryValue(position),
+        telemetry: position.telemetry.enginehours / 3600,
     })
-).filter(position => !!position.telemetry)
+)
 .map(position => ({
     nr_patrimonio: position.device,
-    dt_medicao: position.devicetime.replace('0Z', 'Z'),
+    dt_medicao: position.devicetime,
     vl_medicao: position.telemetry
 }))
 
