@@ -7,7 +7,9 @@ const connection = await createConnection()
 const devices = await getDevices(connection)
 const positions = getPositions(devices)
 
-const gps = positions.map(
+const gps = positions
+.filter(position => position.telemetry.enginehours)
+.map(
     position => ({
         devicetime: new Date(position.device_time - BR_TIME_OFFSET).toISOString(),
         device: position.patrimonio,
@@ -17,7 +19,7 @@ const gps = positions.map(
 .map(position => ({
     nr_patrimonio: position.device,
     dt_medicao: position.devicetime,
-    vl_medicao: position.telemetry
+    vl_medicao: position.telemetry.toFixed(1)
 }))
 
 const data_sent = JSON.stringify({ gps })
