@@ -1,4 +1,5 @@
-import { Client } from 'pg'
+import pg from 'pg'
+const { Client } = pg
 
 export const createConnection = async () => {
     const client = new Client({
