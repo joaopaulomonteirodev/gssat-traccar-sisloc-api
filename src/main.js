@@ -4,7 +4,7 @@ import { sendData } from "./request.js"
 const BR_TIME_OFFSET = 3 * 60 * 60 * 1000
 const connection = await createConnection()
 
-const [results] = await connection
+const { rows: results } = await connection
     .query(`SELECT p.deviceid, p.devicetime, p.attributes AS 'position_data', d.attributes AS 'device_data'
     FROM tc_positions p
         INNER JOIN tc_devices d ON(d.id = p.deviceid)
