@@ -2,8 +2,10 @@ import { createConnection } from "./conection.js"
 import { sendData } from "./request.js"
 
 const MILISEC_TO_HOUR = 1000 * 60 * 60
+const MINUTE_TO_HOUR = 60
 
-const toHours = (timeinmili) => (timeinmili / MILISEC_TO_HOUR).toFixed(1)
+const miliToHours = (timeinmili) => (timeinmili / MILISEC_TO_HOUR).toFixed(1)
+const minToHours = (timeinmin) => (timeinmin / MINUTE_TO_HOUR).toFixed(1)
 
 const BR_TIME_OFFSET = 3 * 60 * 60 * 1000
 const connection = await createConnection()
@@ -25,10 +27,10 @@ const gps = results.map(
         telemetry: JSON.parse(result.position_data)
     })
 ).filter(position => !!position.device.Patrimonio)
-.map(position => ({
-    nr_patrimonio: position.device.Patrimonio,
-    dt_medicao: position.devicetime.replace('0Z', 'Z'),
-    vl_medicao: toHours(position.telemetry.hours)
+.map(({device, devicetime, telemetry}) => ({
+    nr_patrimonio: device.Patrimonio,
+    dt_medicao: devicetime.replace('0Z', 'Z'),
+    vl_medicao: telemetry.io18 ? minToHours(telemetry.io18) : miliToHours(telemetry.hours)
 }))
 
 const data_sent = JSON.stringify({ gps })
